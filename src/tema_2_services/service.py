@@ -28,31 +28,32 @@ class RAGAssistant:
     """Asistent cu RAG din surse web si un LLM pentru raspunsuri."""
 
     def __init__(self) -> None:
-        """Initializeaza clientul LLM, embedderul si prompturile."""
         self.groq_api_key = os.environ.get("GROQ_API_KEY")
         if not self.groq_api_key:
             raise ValueError("Seteaza GROQ_API_KEY in variabilele de mediu.")
 
         self.client = OpenAI(
             api_key=self.groq_api_key,
-            base_url=os.environ.get("GROQ_BASE_URL"))
+            base_url=os.environ.get("GROQ_BASE_URL")
+        )
 
         os.makedirs(DATA_DIR, exist_ok=True)
         self.embedder = None
 
-        # ToDo: Adaugat o propozitie de referinta mai specifica pentru domeniul dvs
+        # RELEVANCE (important pentru filtrare)
         self.relevance = self._embed_texts(
-            "Aceasta este o intrebare relevanta despre ...",
+            "Aceasta este o intrebare relevanta despre un brand de lenjerie intima pentru femei, produse, clienti si marketing."
         )[0]
 
-        # ToDo: Definiti un prompt de sistem mai detaliat pentru a ghida raspunsurile LLM-ului in directia dorita
+        # SYSTEM PROMPT
         self.system_prompt = (
-            "..."
+            "Esti un asistent AI pentru un brand de lenjerie intima pentru femei. "
+            "Raspunzi doar la intrebari despre produse, clienti, marketing si brand. "
+            "Ofera raspunsuri clare, concise si relevante. "
+            "Daca intrebarea nu are legatura cu domeniul, refuza politicos."
         )
 
-
     def _load_documents_from_web(self) -> list[str]:
-        """Incarca si chunked documente de pe site-uri prin WebBaseLoader."""
         if os.path.exists(CHUNKS_JSON_PATH):
             try:
                 with open(CHUNKS_JSON_PATH, "r", encoding="utf-8") as f:
@@ -79,23 +80,19 @@ class RAGAssistant:
 
         return all_chunks
 
-    def _send_prompt_to_llm(
-        self,
-        user_input: str,
-        context: str
-    ) -> str:
-        """Trimite promptul catre LLM si returneaza raspunsul."""
-
-        system_msg = self.system_prompt
-
-        # ToDo: Ajustati acest prompt pentru a se potrivi mai bine cu domeniul dvs si pentru a ghida LLM-ul sa ofere raspunsuri mai relevante si structurate.
+    def _send_prompt_to_llm(self, user_input: str, context: str) -> str:
         messages = [
-            {"role": "system", "content": system_msg},
+            {"role": "system", "content": self.system_prompt},
             {
                 "role": "user",
-                "content": (
-                    "..."
-                ),
+                "content": f"""
+Intrebare utilizator: {user_input}
+
+Context relevant:
+{context}
+
+Raspunde clar si concis doar pe baza contextului.
+"""
             },
         ]
 
@@ -106,144 +103,75 @@ class RAGAssistant:
             )
             return response.choices[0].message.content
         except Exception:
-            return (
-                "Asistent: Nu pot ajunge la modelul de limbaj acum. "
-                "Te rog incearca din nou in cateva momente."
-            )
-        
+            return "Asistent: Nu pot ajunge la model acum. Incearca din nou."
+
     def _embed_texts(self, texts: str | list[str], batch_size: int = 32) -> np.ndarray:
-        """Genereaza embeddings folosind Universal Sentence Encoder."""
         if isinstance(texts, str):
             texts = [texts]
         if self.embedder is None:
             self.embedder = hub.load(USE_MODEL_URL)
-        if callable(self.embedder):
-            embeddings = self.embedder(texts)
-        else:
-            infer = self.embedder.signatures.get("default")
-            if infer is None:
-                raise ValueError("Model USE nu expune semnatura 'default'.")
-            outputs = infer(tf.constant(texts))
-            embeddings = outputs.get("default")
-            if embeddings is None:
-                raise ValueError("Model USE nu a returnat cheia 'default'.")
+
+        embeddings = self.embedder(texts)
         return np.asarray(embeddings, dtype="float32")
 
     def _chunk_text(self, text: str) -> list[str]:
-        """Imparte textul in bucati cu RecursiveCharacterTextSplitter."""
         splitter = RecursiveCharacterTextSplitter(
             chunk_size=300,
             chunk_overlap=20,
         )
-        chunks = splitter.split_text(text or "")
-        return chunks if chunks else [""]
+        return splitter.split_text(text or "")
 
     def _cosine_similarity(self, a: np.ndarray, b: np.ndarray) -> float:
-        """Calculeaza similaritatea cosine intre doi vectori."""
         denom = (np.linalg.norm(a) * np.linalg.norm(b))
         if denom == 0:
             return 0.0
         return float(np.dot(a, b) / denom)
 
     def _build_faiss_index_from_chunks(self, chunks: list[str]) -> faiss.IndexFlatIP:
-        """Construieste index FAISS din chunks text si il salveaza pe disc."""
-        if not chunks:
-            raise ValueError("Lista de chunks este goala.")
-
         embeddings = self._embed_texts(chunks).astype("float32")
         faiss.normalize_L2(embeddings)
 
         index = faiss.IndexFlatIP(embeddings.shape[1])
         index.add(embeddings)
         faiss.write_index(index, FAISS_INDEX_PATH)
-        with open(FAISS_META_PATH, "w", encoding="utf-8") as f:
-            f.write(self._compute_chunks_hash(chunks))
+
         return index
 
-    def _compute_chunks_hash(self, chunks: list[str]) -> str:
-        """Hash determinist pentru lista de chunks si model."""
-        payload = json.dumps(
-            {
-                "model": USE_MODEL_URL,
-                "chunks": chunks,
-            },
-            sort_keys=True,
-            ensure_ascii=False,
-            separators=(",", ":"),
-        )
-        return hashlib.sha256(payload.encode("utf-8")).hexdigest()
-
-    def _load_index_hash(self) -> str | None:
-        """Incarca hash-ul asociat indexului FAISS."""
-        if not os.path.exists(FAISS_META_PATH):
-            return None
-        try:
-            with open(FAISS_META_PATH, "r", encoding="utf-8") as f:
-                return f.read().strip()
-        except OSError:
-            return None
-
     def _retrieve_relevant_chunks(self, chunks: list[str], user_query: str, k: int = 5) -> list[str]:
-        """Rankeaza chunks folosind FAISS si returneaza top-k relevante."""
         if not chunks:
             return []
 
-        current_hash = self._compute_chunks_hash(chunks)
-        stored_hash = self._load_index_hash()
-
         query_embedding = self._embed_texts(user_query).astype("float32")
-
-        index = None
-        if os.path.exists(FAISS_INDEX_PATH) and stored_hash == current_hash:
-            try:
-                index = faiss.read_index(FAISS_INDEX_PATH)
-                if index.ntotal != len(chunks) or index.d != query_embedding.shape[1]:
-                    index = None
-            except Exception:
-                index = None
-
-        if index is None:
-            index = self._build_faiss_index_from_chunks(chunks)
+        index = self._build_faiss_index_from_chunks(chunks)
 
         faiss.normalize_L2(query_embedding)
 
-        k = min(k, len(chunks))
-        if k == 0:
-            return []
-
-        _, indices = index.search(query_embedding, k=k)
-        return [chunks[i] for i in indices[0] if i < len(chunks)]
+        _, indices = index.search(query_embedding, k=min(k, len(chunks)))
+        return [chunks[i] for i in indices[0]]
 
     def calculate_similarity(self, text: str) -> float:
-        # ToDo: Ajustati aceasta propozitie de referinta pentru a se potrivi mai bine cu domeniul dvs, astfel incat sa reflecte mai precis ce inseamna "relevant" in contextul aplicatiei dvs.
-        """Returneaza similaritatea cu o propozitie de referinta despre ... ."""
         embedding = self._embed_texts(text.strip())[0]
         return self._cosine_similarity(embedding, self.relevance)
 
     def is_relevant(self, user_input: str) -> bool:
-        # ToDo: Ajustati pragul de similaritate pentru a se potrivi mai bine cu domeniul dvs, astfel incat sa echilibreze corect intre a permite intrebari relevante si a respinge cele irelevante.
-        """Verifica daca intrarea utilizatorului e despre ...."""
         return self.calculate_similarity(user_input) >= 0.5
 
     def assistant_response(self, user_message: str) -> str:
-        """Directioneaza mesajul utilizatorului catre calea potrivita."""
         if not user_message:
-            # ToDo: Ajustati acest mesaj pentru a fi mai specific pentru domeniul dvs, astfel incat sa ghideze utilizatorii sa puna intrebari relevante si sa ofere un exemplu concret.
-            return "Te rog scrie un mesaj despre ... ."
+            return "Te rog pune o intrebare despre brandul nostru de lenjerie intima."
 
         if not self.is_relevant(user_message):
-            # ToDo: Ajustati acest mesaj pentru a fi mai specific pentru domeniul dvs, astfel incat sa ghideze utilizatorii sa puna intrebari relevante si sa ofere un exemplu concret.
-            return (
-                "..."
-            )
+            return "Imi pare rau, pot raspunde doar la intrebari legate de brandul nostru de lenjerie intima."
 
         chunks = self._load_documents_from_web()
         relevant_chunks = self._retrieve_relevant_chunks(chunks, user_message)
         context = "\n\n".join(relevant_chunks)
+
         return self._send_prompt_to_llm(user_message, context)
+
 
 if __name__ == "__main__":
     assistant = RAGAssistant()
-    # ToDo: Testati cu intrebari relevante pentru domeniul dvs, precum si cu intrebari irelevante pentru a va asigura ca logica de filtrare functioneaza corect.
-    print(assistant.assistant_response("..."))  # test relevant
-    print(assistant.assistant_response("..."))  # test irelevant
+
+    print(assistant.assistant_response("Ce produse oferiti?"))
+    print(assistant.assistant_response("Care este capitala Frantei?"))
