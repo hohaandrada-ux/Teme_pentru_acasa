@@ -1,11 +1,45 @@
 IDEE DE AFACERE
-Ideea mea de afacere este crearea unui brand de lenjerie intima pentru femei, care pune accent pe feminitate, confort si incredere. Brandul se va adresa femeilor moderne care doresc sa se simta bine in pielea lor si sa aiba produse de calitate, cu design atractiv.
+
+Ideea mea de afacere este crearea unui brand de lenjerie intima pentru femei, care pune accent pe feminitate, confort si incredere. Brandul se adreseaza femeilor moderne care doresc sa se simta bine in pielea lor si sa aiba produse de calitate, cu design atractiv.
+
 PROMPTURI FOLOSITE
-Prompt 1: Genereaza o idee de afacere in domeniul fashion care sa fie moderna si profitabila.
+
+Pentru dezvoltarea ideii de afacere au fost utilizate mai multe tipuri de interogari structurale, precum Zero-Shot, Few-Shot, Chain-of-Thought, Meta, Tree-of-Thought si ReAct Prompting.
+
+Prompt 1 – Tip: Zero-Shot Prompting
+Genereaza o idee de afacere in domeniul fashion care sa fie moderna si profitabila.
 Rezultat: ChatGPT a sugerat un brand de lenjerie intima orientat spre confort si design premium.
-Prompt 2: Creeaza o descriere de brand pentru un business de lenjerie intima.
+
+Prompt 2 – Tip: Zero-Shot Prompting
+Creeaza o descriere de brand pentru un business de lenjerie intima.
 Rezultat: A fost generata o descriere care pune accent pe incredere, feminitate si calitate.
-Prompt 3: Sugereaza strategii de marketing pentru un brand de lenjerie intima.
+
+Prompt 3 – Tip: Zero-Shot Prompting
+Sugereaza strategii de marketing pentru un brand de lenjerie intima.
 Rezultat: Au fost oferite idei precum promovare pe Instagram, colaborari cu influenceri si campanii emotionale.
+
+ALTE TIPURI DE PROMPTING
+
+Few-Shot Prompting
+Exemplu: Genereaza nume de brand similare cu: Victoria's Secret, Intimissimi.
+Rezultat: Au fost generate nume de brand relevante pentru industrie.
+
+Chain-of-Thought Prompting
+Exemplu: Explica pas cu pas cum poate fi lansat un brand de lenjerie intima.
+Rezultat: A fost oferit un plan structurat de la idee la lansare.
+
+Meta Prompting
+Exemplu: Imbunatateste acest prompt pentru a obtine un plan de business mai detaliat: creeaza un brand de lenjerie intima.
+Rezultat: Prompt-ul a devenit mai clar si a generat raspunsuri mai detaliate.
+
+Tree-of-Thought Prompting
+Exemplu: Ofera mai multe directii pentru dezvoltarea brandului (premium, accesibil, sustenabil).
+Rezultat: Au fost analizate mai multe optiuni strategice.
+
+ReAct Prompting
+Exemplu: Analizeaza piata si recomanda actiuni concrete pentru lansarea unui brand de lenjerie intima.
+Rezultat: Au fost oferite atat analize, cat si pasi concreti de actiune.
+
 CONCLUZIE
-Cu ajutorul ChatGPT am reusit sa dezvolt o idee de afacere clara, cu directie si strategii de dezvoltare. Acest proces m-a ajutat sa inteleg mai bine cum poate fi construita o afacere de la zero.
+
+Cu ajutorul ChatGPT am reusit sa dezvolt o idee de afacere clara, cu directie si strategii de dezvoltare. Utilizarea diferitelor tipuri de prompting a contribuit la obtinerea unor raspunsuri mai structurate si relevante, demonstrand intelegerea atat a aplicarii practice, cat si a conceptelor teoretice.
