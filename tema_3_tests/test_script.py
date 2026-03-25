@@ -1,7 +1,6 @@
 import sys
 import os
 
-# ca să poți importa din src
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from src.service import model_function
