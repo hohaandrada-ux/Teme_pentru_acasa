@@ -8,23 +8,19 @@ from src.service import model_function
 
 
 def test_positive():
-    result = model_function("Îmi place produsul")
-    assert "pozitiv" in result.lower()
+    assert model_function("Îmi place produsul") == "pozitiv"
 
 
 def test_negative():
-    result = model_function("Nu îmi place produsul")
-    assert "negativ" in result.lower()
+    assert model_function("Nu îmi place produsul") == "negativ"
 
 
 def test_neutral():
-    result = model_function("Produsul este ok")
-    assert "neutru" in result.lower()
+    assert model_function("Produsul este ok") == "neutru"
 
 
 def test_empty_input():
-    result = model_function("")
-    assert result is not None
+    assert model_function("") == "neutru"
 
 
 def test_case_insensitivity():
