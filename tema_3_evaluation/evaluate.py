@@ -33,6 +33,8 @@ def run_evaluation():
     acc = accuracy(predictions, labels)
 
     print("Accuracy:", acc)
+    print("Predictions:", predictions)
+    print("Labels:", labels)
 
 
 if __name__ == "__main__":
