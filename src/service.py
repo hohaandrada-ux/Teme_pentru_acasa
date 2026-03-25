@@ -1,7 +1,7 @@
 def model_function(text):
-    if "place" in text.lower():
-        return "pozitiv"
-    elif "nu" in text.lower():
+    if "nu" in text.lower():
         return "negativ"
+    elif "place" in text.lower():
+        return "pozitiv"
     else:
         return "neutru"
