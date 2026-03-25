@@ -25,3 +25,11 @@ def test_neutral():
 def test_empty_input():
     result = model_function("")
     assert result is not None
+
+
+def test_case_insensitivity():
+    assert model_function("NU IMI PLACE") == "negativ"
+
+
+def test_priority_logic():
+    assert model_function("Nu îmi place") == "negativ"
