@@ -1,25 +1,25 @@
 # Tema 4 – Generare videoclip cu Veo
 
 ## Descriere
-Pentru această temă am realizat un videoclip folosind Veo, bazat pe ideea unei transformări personale (de la lipsă de motivație la succes și încredere).
+Pentru aceasta tema am realizat un videoclip folosind Veo, bazat pe ideea unei transformari personale (de la lipsa de motivatie la succes si incredere).
 
-Videoclipul este structurat în mai multe scene pentru a crea o poveste coerentă:
-- început (stare de oboseală și lipsă de energie)
-- schimbare (introducerea unei rutine sănătoase)
-- progres (dezvoltare profesională)
-- final (încredere și echilibru)
+Videoclipul este structurat in mai multe scene pentru a crea o poveste coerenta:
+- inceput (stare de oboseala si lipsa de energie)
+- schimbare (introducerea unei rutine sanatoase)
+- progres (dezvoltare profesionala)
+- final (incredere si echilibru)
 
-## Tehnologie utilizată
+## Tehnologie utilizata
 - Veo (pentru generarea videoclipurilor)
-- CapCut (pentru editare și combinarea scenelor)
+- CapCut (pentru editare si combinarea scenelor)
 
 ## Prompturi utilizate
-Prompturile complete pot fi găsite în fișierul:
+Prompturile complete pot fi gasite in fisierul:
 `prompturi_videoclip.txt`
 
 ## Rezultat final
-Videoclipul final este disponibil în acest repository:
+Videoclipul final este disponibil in acest repository:
 `video_final.mp4`
 
-## Observații
-Pentru a obține un rezultat mai coerent, videoclipul a fost generat pe mai multe scene, care ulterior au fost unite într-un singur clip.
+## Observatii
+Pentru a obtine un rezultat mai coerent, videoclipul a fost generat pe mai multe scene, care ulterior au fost unite intr-un singur clip.
