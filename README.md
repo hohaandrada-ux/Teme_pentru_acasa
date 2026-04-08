@@ -19,7 +19,7 @@ Prompturile complete pot fi gasite in fisierul:
 
 ## Rezultat final
 Videoclipul final este disponibil in acest repository:
-`video_final.mp4`
+`download (3).mp4`
 
 ## Observatii
 Pentru a obtine un rezultat mai coerent, videoclipul a fost generat pe mai multe scene, care ulterior au fost unite intr-un singur clip.
